@@ -1,2 +1,2 @@
 # Sitech-Internship
-My name is mohannad Alamayreh i hope you enjoy my first github repo
+This repository contains my completed tasks and projects as part of my Cloud DevOps internship with Sitech.
