@@ -8,7 +8,7 @@ SSL: secure sockets layer
 
 TLS: transport layer security.(Layer 4 in osi model)
 
-ssl certificate??
+SSL Certificate : certificate that establishes a secure encrypted connection between a web server and a web browser.
 
 
 
