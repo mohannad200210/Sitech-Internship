@@ -68,4 +68,73 @@ note : options before container name passing to container&#x20;
 
 options after container name passing to as container&#x20;
 
+\---------------------------------------------------------------------
+
+## &#x20; Restart Policies :&#x20;
+
+why containers stops ?
+
+1- after finish its work (exit code = 0)
+
+```
+docker container run ubuntu expr 3 + 5
+docker container ls -l
+ubuntu "expr 3 + 5" Exited (0) 11 seconds ago
+```
+
+2-A container may stop due to a failure like passing  incorrect type of parameter(exit code = 1)
+
+```
+docker container run ubuntu expr three + 5
+docker container ls -l
+ubuntu "expr three + 5" Exited (1) 2 seconds ago
+```
+
+3-A container can stopped manually by Docker stop command (SIGTERM signal followed by the SIGKILL signal) (exit code = 0)
+
+```
+docker container stop httpd
+docker container ls -l
+httpd "httpd-foreground" Exited (0) 4 days ago
+```
+
+you can configure the container to restart automatically after any of the above situation by the Restart Policies : &#x20;
+
+<figure><img src=".gitbook/assets/Restart ploicy.png" alt=""><figcaption></figcaption></figure>
+
+```
+docker container run --restart=no ubuntu # default
+docker container run --restart=on-failure ubuntu
+docker container run --restart=always ubuntu
+docker container run --restart=unless-stopped ubuntu
+```
+
+note : on always option it does not immediately restart the container once it is manually stopped. It is restarted only when the Docker daemon restarts, so keep that in mind. Because if an admin ran the Docker container stop command he ran it because he need to stop it&#x20;
+
+\--------------------------------------------------------------------------------
+
+## Live Restore
+
+it's a configuration that's make your containers don't stops and still running when your Docker Daemon stopped/Crash&#x20;
+
+```
+gedit/etc/docker/daemon.json
+{
+"debug": true,
+"hosts": ["tcp://192.168.1.10:2376"],
+"live-restore": true #add this to your file
+}
+systemctl reload docker
+```
+
+\----------------------------------------------------------------------------------------------------
+
+## &#x20;Publishing Ports  :&#x20;
+
+&#x20;when you start a container this container will have internal ip and port which will be reachable from inside the host and to access it from outside your host you have to do something called **port mapping** :&#x20;
+
+<figure><img src=".gitbook/assets/port-mapping.png" alt=""><figcaption></figcaption></figure>
+
+### &#x20;there is more complicated status when your host have more than one NIC in this case if you use -p this will open the same port in the all NIC
+
 [^1]: 

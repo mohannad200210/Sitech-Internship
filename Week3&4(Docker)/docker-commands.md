@@ -1,6 +1,6 @@
 # Docker commands
 
-## &#x20;Setup:
+&#x20;Setup:
 
 &#x20;show docker information (how many images,containers)
 
@@ -319,3 +319,27 @@ mohannad
 
 \------------------------------------------------------------------------
 
+## &#x20;Restart Policies : (you can find more informations in Docker Engine Page  )
+
+```
+docker container run --restart=no ubuntu # default
+docker container run --restart=on-failure ubuntu
+docker container run --restart=always ubuntu
+docker container run --restart=unless-stopped ubuntu
+```
+
+\--------------------------------------------------------------------------
+
+## Live Restore
+
+it's a configuration that's make your containers don't stops and still running when your Docker Daemon stopped/Crash&#x20;
+
+```
+gedit/etc/docker/daemon.json
+{
+"debug": true,
+"hosts": ["tcp://192.168.1.10:2376"],
+"live-restore": true #add this to your file
+}
+systemctl reload docker
+```
