@@ -408,3 +408,45 @@ you will need this section when you received this message :&#x20;
 ```
 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
 ```
+
+you can find every thing (slides : 110-118):[https://kodekloud.com/wp-content/uploads/2021/08/Docker-Certified-Associate.pdf](https://kodekloud.com/wp-content/uploads/2021/08/Docker-Certified-Associate.pdf)
+
+\--------------------------------------------------------------------------------------------------
+
+## &#x20;Logging Drivers( where logs are stored and in which type)
+
+by default it stores as json file in :&#x20;
+
+```
+escanor@escanor-virtual-machine:~/Desktop$ sudo ls /var/lib/docker/containers/1b5a2b3bc0f5af53ff78ab23e4cfc7f7c5a77c787537a8ac51318035f313a921
+1b5a2b3bc0f5af53ff78ab23e4cfc7f7c5a77c787537a8ac51318035f313a921-json.log 
+```
+
+you can find  the current way of the logs driver by :&#x20;
+
+```
+escanor@escanor-virtual-machine:~/Desktop$ docker system info | grep -i logging
+ Logging Driver: json-file
+```
+
+you can change the logging type in docker :&#x20;
+
+```
+gedit /etc/docker/daemon.json
+{
+  "log-driver": "syslog"
+}
+systemctl restart docker
+```
+
+you can change the logs type only for one  container using option : --log-driver=syslog
+
+```
+docker run –d --log-driver=journald nginx
+```
+
+you can now the logs type for specific container by inspect command
+
+```
+docker container inspect [container ID]
+```
