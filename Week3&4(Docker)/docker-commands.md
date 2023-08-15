@@ -116,7 +116,7 @@ Status: Downloaded newer image for httpd:latest
 
 \-----------------------------------------------------------------------------------------
 
-## &#x20;CONTAINER NAME :&#x20;
+## &#x20;CONTAINER NAME : (must be unique)
 
 
 
@@ -296,7 +296,7 @@ a00b5535783d
 Total reclaimed space: 1223423
 </code></pre>
 
-## &#x20;but settings when create container to Remove it after finishing  it's work (Remove Flag)
+## &#x20;but settings when create container to Remove it after finishing  it's work (Remove Flag : --rm means delete the container after first stop or after finishing it's work)
 
 ```
 docker container run --rm ubuntu expr 4 + 5
@@ -384,17 +384,27 @@ you can only specify the internal port and docker will chose random external por
 docker run –p 5000 kodekloud/simple-webapp
 ```
 
-**importaaaant : if you have multiple internal port in your docker container and you want to maps it ALL using one command use -P option**
+**importaaaant : if you have multiple internal port in your docker container and you want to maps it ALL using one command use -P option(-p : static port not change after restart -P: random dynamic port change after restart)**
 
 ```
 docker run –P kodekloud/simple-webapp
 ```
 
-and you can see all the container internal ports using "docker inspect \[container name]" in the expose feild
+and you can see all the container internal ports using "docker inspect \[container name]" in the expose field
 
 ```
 docker run –P --expose=8080 kodekloud/simple-webapp
 -P: This flag tells Docker to publish all exposed ports to random ports on the host. For example, if the container exposes port 8080, Docker will map it to a random port on the host.
 
 --expose=8080: This flag specifies that the container will expose port 8080. This doesn't 
+```
+
+\------------------------------------------------------------------------------------------------
+
+## Troubleshoot Docker Daemon :&#x20;
+
+you will need this section when you received this message :&#x20;
+
+```
+Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
 ```

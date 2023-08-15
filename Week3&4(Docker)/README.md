@@ -2,6 +2,13 @@
 
 Docker Demon (Docker Server)<------>Rest API  <------>Docker cli
 
+Docker Ports :&#x20;
+
+```
+2375 : Un-encrypted traffic
+2376 : Encrypted    traffic
+```
+
 ## &#x20;Docker objects :&#x20;
 
 * **Docker Image** : A Docker image is a lightweight, read-only template that contains a base image of Os system or application like web server or db
@@ -109,7 +116,7 @@ docker container run --restart=always ubuntu
 docker container run --restart=unless-stopped ubuntu
 ```
 
-note : on always option it does not immediately restart the container once it is manually stopped. It is restarted only when the Docker daemon restarts, so keep that in mind. Because if an admin ran the Docker container stop command he ran it because he need to stop it&#x20;
+note : on always option it does not immediately restart the container once it is manually stopped. It is restarted only when the Docker daemon restarts(like : systemctl restart docker ), so keep that in mind. Because if an admin ran the Docker container stop command he ran it because he need to stop it&#x20;
 
 \--------------------------------------------------------------------------------
 
@@ -155,13 +162,13 @@ you can only specify the internal port and docker will chose random external por
 docker run –p 5000 kodekloud/simple-webapp
 ```
 
-**importaaaant : if you have multiple internal port in your docker container and you want to maps it ALL using one command use -P option**
+**importaaaant : if you have multiple internal port in your docker container and you want to maps it ALL using one command use -P option(-p : static port not change after restart -P: random dynamic port change after restart)**
 
 ```
 docker run –P kodekloud/simple-webapp
 ```
 
-and you can see all the container internal ports using "docker inspect \[container name]" in the expose feild
+and you can see all the container internal ports using "docker inspect \[container name]" in the expose field
 
 ```
 docker run –P --expose=8080 kodekloud/simple-webapp
