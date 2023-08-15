@@ -9,7 +9,13 @@ Docker Ports :&#x20;
 2376 : Encrypted    traffic
 ```
 
-## &#x20;Docker objects :&#x20;
+&#x20;OCI : open container initiative.&#x20;
+
+We can run containers without installing Docker.
+
+default data directory for Docker : /var/lib/docker/
+
+## Docker objects :&#x20;
 
 * **Docker Image** : A Docker image is a lightweight, read-only template that contains a base image of Os system or application like web server or db
 * **Docker Container :** A Docker container is read-write template , runnable instance version created from a Docker image. It's an isolated and self-sufficient environment that contains the application and all its dependencies. Containers run on the host operating system but are isolated from each other and from the host system.&#x20;
