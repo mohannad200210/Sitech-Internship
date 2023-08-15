@@ -343,3 +343,58 @@ gedit/etc/docker/daemon.json
 }
 systemctl reload docker
 ```
+
+\-----------------------------------------------------------------------
+
+## copy files from host to container (وبالعكس) :&#x20;
+
+```
+docker container cp [src path] [dst path]
+cp host-->docker :
+docker container cp ~/Desktop/test.txt webapp:/tmp/test.txt
+cp docker-->host :
+docker container cp webapp:/tmp/test.txt ~/Desktop/test.txt
+```
+
+\------------------------------------------------------------------------
+
+## &#x20; Port mapping (you can find more informations in Docker Engine Page  ) :&#x20;
+
+you can see your docker mapping ports rule here :&#x20;
+
+```
+iptables -t nat –S DOCKER
+```
+
+most basic port mapping :&#x20;
+
+```
+docker run –p 8000:5000 kodekloud/simple-webapp
+```
+
+you can specify one network interface if you have multiple NIC by using it's IP:
+
+```
+docker run –p 192.168.1.5:8000:5000 kodekloud/simple-webapp
+```
+
+you can only specify the internal port and docker will chose random external port from /proc/sys/net/ipv4/ip\_local\_port\_range&#x20;
+
+```
+docker run –p 5000 kodekloud/simple-webapp
+```
+
+**importaaaant : if you have multiple internal port in your docker container and you want to maps it ALL using one command use -P option**
+
+```
+docker run –P kodekloud/simple-webapp
+```
+
+and you can see all the container internal ports using "docker inspect \[container name]" in the expose feild
+
+```
+docker run –P --expose=8080 kodekloud/simple-webapp
+-P: This flag tells Docker to publish all exposed ports to random ports on the host. For example, if the container exposes port 8080, Docker will map it to a random port on the host.
+
+--expose=8080: This flag specifies that the container will expose port 8080. This doesn't 
+```
