@@ -207,4 +207,3 @@ then repeat all the above for every namespace you want to add it to this network
 ip addr add 192.168.15.5/24 dev v-net-0
 ```
 
-<mark style="color:red;">Complete  the rest of the vid !!!!!</mark>
