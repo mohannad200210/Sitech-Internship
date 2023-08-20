@@ -1,6 +1,6 @@
 # Docker commands
 
-## &#x20;Setup:
+&#x20;Setup:
 
 &#x20;show docker information (how many images,containers)
 
@@ -116,7 +116,7 @@ Status: Downloaded newer image for httpd:latest
 
 \-----------------------------------------------------------------------------------------
 
-## &#x20;CONTAINER NAME :&#x20;
+## &#x20;CONTAINER NAME : (must be unique)
 
 
 
@@ -296,7 +296,7 @@ a00b5535783d
 Total reclaimed space: 1223423
 </code></pre>
 
-## &#x20;but settings when create container to Remove it after finishing  it's work (Remove Flag)
+## &#x20;but settings when create container to Remove it after finishing  it's work (Remove Flag : --rm means delete the container after first stop or after finishing it's work)
 
 ```
 docker container run --rm ubuntu expr 4 + 5
@@ -319,3 +319,134 @@ mohannad
 
 \------------------------------------------------------------------------
 
+## &#x20;Restart Policies : (you can find more informations in Docker Engine Page  )
+
+```
+docker container run --restart=no ubuntu # default
+docker container run --restart=on-failure ubuntu
+docker container run --restart=always ubuntu
+docker container run --restart=unless-stopped ubuntu
+```
+
+\--------------------------------------------------------------------------
+
+## Live Restore
+
+it's a configuration that's make your containers don't stops and still running when your Docker Daemon stopped/Crash&#x20;
+
+```
+gedit/etc/docker/daemon.json
+{
+"debug": true,
+"hosts": ["tcp://192.168.1.10:2376"],
+"live-restore": true #add this to your file
+}
+systemctl reload docker
+```
+
+\-----------------------------------------------------------------------
+
+## copy files from host to container (وبالعكس) :&#x20;
+
+```
+docker container cp [src path] [dst path]
+cp host-->docker :
+docker container cp ~/Desktop/test.txt webapp:/tmp/test.txt
+cp docker-->host :
+docker container cp webapp:/tmp/test.txt ~/Desktop/test.txt
+```
+
+\------------------------------------------------------------------------
+
+## &#x20; Port mapping (you can find more informations in Docker Engine Page  ) :&#x20;
+
+you can see your docker mapping ports rule here :&#x20;
+
+```
+iptables -t nat –S DOCKER
+```
+
+most basic port mapping :&#x20;
+
+```
+docker run –p 8000:5000 kodekloud/simple-webapp
+```
+
+you can specify one network interface if you have multiple NIC by using it's IP:
+
+```
+docker run –p 192.168.1.5:8000:5000 kodekloud/simple-webapp
+```
+
+you can only specify the internal port and docker will chose random external port from /proc/sys/net/ipv4/ip\_local\_port\_range&#x20;
+
+```
+docker run –p 5000 kodekloud/simple-webapp
+```
+
+**importaaaant : if you have multiple internal port in your docker container and you want to maps it ALL using one command use -P option(-p : static port not change after restart -P: random dynamic port change after restart)**
+
+```
+docker run –P kodekloud/simple-webapp
+```
+
+and you can see all the container internal ports using "docker inspect \[container name]" in the expose field
+
+```
+docker run –P --expose=8080 kodekloud/simple-webapp
+-P: This flag tells Docker to publish all exposed ports to random ports on the host. For example, if the container exposes port 8080, Docker will map it to a random port on the host.
+
+--expose=8080: This flag specifies that the container will expose port 8080. This doesn't 
+```
+
+\------------------------------------------------------------------------------------------------
+
+## Troubleshoot Docker Daemon :&#x20;
+
+you will need this section when you received this message :&#x20;
+
+```
+Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+```
+
+you can find every thing (slides : 110-118):[https://kodekloud.com/wp-content/uploads/2021/08/Docker-Certified-Associate.pdf](https://kodekloud.com/wp-content/uploads/2021/08/Docker-Certified-Associate.pdf)
+
+\--------------------------------------------------------------------------------------------------
+
+## &#x20;Logging Drivers( where logs are stored and in which type)
+
+by default it stores as json file in :&#x20;
+
+```
+escanor@escanor-virtual-machine:~/Desktop$ sudo ls /var/lib/docker/containers/1b5a2b3bc0f5af53ff78ab23e4cfc7f7c5a77c787537a8ac51318035f313a921
+1b5a2b3bc0f5af53ff78ab23e4cfc7f7c5a77c787537a8ac51318035f313a921-json.log 
+```
+
+you can find  the current way of the logs driver by :&#x20;
+
+```
+escanor@escanor-virtual-machine:~/Desktop$ docker system info | grep -i logging
+ Logging Driver: json-file
+```
+
+you can change the logging type in docker :&#x20;
+
+```
+gedit /etc/docker/daemon.json
+{
+  "log-driver": "syslog"
+}
+systemctl restart docker
+```
+
+you can change the logs type only for one  container using option : --log-driver=syslog
+
+```
+docker run –d --log-driver=journald nginx
+```
+
+you can now the logs type for specific container by inspect command
+
+```
+docker container inspect [container ID]
+```
