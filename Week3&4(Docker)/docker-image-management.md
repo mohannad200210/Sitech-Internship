@@ -79,7 +79,7 @@ docker login gcr.io
 
 \-------------------------------------------------
 
-### retag :
+### retag : (before push image you should retag the name to be \[username]/\[containername])
 
 create image copy (it's actually not a copy it's only a <mark style="color:red;">soft link</mark> with the same ID but but with different TAG )&#x20;
 
@@ -273,21 +273,32 @@ WORKDIR : change the working directory when building dockerfile layers
 WORKDIR /opt
 ```
 
+ADD : copy + you can give url so (download+copy) + you can give it tar file so (untar+copy)
 
+```
+ADD /testdir /testdir
+OR
+ADD app.tar.xz /testdir
+OR
+ADD http://app.tar.xz /testdir
+```
 
 CMD : <mark style="color:red;">only use once as last instruction on Dockerfile and the content of it should be as array</mark>
+
+&#x20;عن طريقها بتمرر الكوماند&#x20;
 
 `CMD` instruction is used to specify the default command that will be executed when a container based on the <mark style="color:blue;">Docker image is started.</mark> The `CMD` instruction sets the command and any arguments that will be executed within the container's environment. It defines the main process that runs when the container starts.
 
 1.  Command in shell
 
     ```Dockerfile
-    CMD echo "Hello, Docker!"
+    CMD echo "Hello Docker!"
     ```
 2.  **command in dockerfile**
 
     ```Dockerfile
-    CMD ["echo", "Hello, Docker!"]
+    CMD ["echo", "Hello Docker!"]
+     CMD ["command","parameter"]
     ```
 
 ```
@@ -331,3 +342,70 @@ customhttpd latest adac0f56a7df 5 seconds ago 138MB
 httpd latest 417af7dc28bc 8 days ago 138MB
 ```
 
+\----------------------------------------
+
+### build context :&#x20;
+
+docker build .&#x20;
+
+in docker build we can but a path in our device or use a github url &#x20;
+
+and if the githup repo don't include a Dockerfile we can chose it from local host :&#x20;
+
+```
+docker build -f Dockerfile.dev https://github.com/myaccount/myapp
+```
+
+the dot is the context is the path of where my image file is in it so Dockerimage use all the files in it to build the image
+
+&#x20;and all the file in it will copied to the docker daemon (/var/lib/docker/tmp/docker-builderxxxxx)
+
+so remove all the unnecessary file from it or include the names of it in .dockerignore file to ignore it&#x20;
+
+.dockerignore will help us to speed up the build and decrise the storge
+
+\---------------------------------------
+
+### build cache :&#x20;
+
+&#x20;When we run the Docker build command, it starts with the first instruction and proceeds to the last instruction. When each layer is built, it is cached so that <mark style="color:red;">if the build fails at a particular stage, it can repurpose the previous layers from the cache and does not really have to rebuild all of them.</mark>&#x20;
+
+&#x20;if we re use the same dockerfile it will be built in few seconds because the file is cached
+
+&#x20;<mark style="color:blue;">if we re use the same dockerfile but change the 4th line it will be use the cached version for the first 3 lines and rebuilt the line 4 and all the following lines</mark>
+
+* <mark style="color:blue;">also checks the checksum of files used in the dockerfile if changes = rebuilt from the file line</mark>
+
+&#x20;best practice :  (Cache Busting & Version Pinning)
+
+```
+RUN apt-get update && apt-get install –y python python-dev python3-pip=20.0.2
+```
+
+\------------------------------------------------------
+
+### &#x20;COPY VS ADD in docker file&#x20;
+
+COPY : only copy files&#x20;
+
+ADD : copy + you can give url so (download+copy) + you can give it tar file so (untar+copy)
+
+\---------------------------------------------------
+
+Base image : image doesn't have parent image so in Dockerfile we type : FROM scratch
+
+example : the original ubuntu file   &#x20;
+
+\--------------------------------------------------------
+
+CMD vs ENTRYPOINT in Dockerfile
+
+CMD : CMD \["executable/command","param1","param2"]
+
+we can overwrite when we run container by add the command with prameter directly&#x20;
+
+```
+docker run -itd ubuntu sleep 10
+```
+
+ENTRYPOINT :
