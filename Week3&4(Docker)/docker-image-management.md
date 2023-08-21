@@ -208,3 +208,126 @@ on the other host after moving testcontainer.tar to it
 docker image import testcontainer.tar newimage:latest
 sha256:8090b7da236bb21aa2e52e6e04dff4b7103753e4046e15457a3daf6dfa723a12
 ```
+
+\------------------------------------------------------------------------
+
+build your own docker image (dockerize an app) :&#x20;
+
+1- built and run your app
+
+2-cd to your app directory
+
+3- create a Dockerfile
+
+4- build the docker image  in your local host
+
+```
+docker build . -f Dockerfile -t [myAccName/MyImageName:tag]
+```
+
+5- push the image to DockerHub:
+
+```
+docker push [image name]
+```
+
+6- you can run the image
+
+```
+docker run -itd -p 83:80 [myAccName/MyImageName:tag]
+```
+
+\--------------------------------------------------------
+
+Docker file structure :&#x20;
+
+must start with (from) and build on past image OR os&#x20;
+
+&#x20;
+
+<figure><img src=".gitbook/assets/DockerFile Struct.png" alt=""><figcaption></figcaption></figure>
+
+other Dockerfile instruction
+
+EXPOSE (what ports app need to open in the image )
+
+```
+EXPOSE  80
+```
+
+ARG (the most powerful to create generic images and dockerfiles ) : define a variable to reuse it in the docker file which help us a lot when re use the same docker file
+
+```
+ARG tomcat_version=8.6.5
+RUN echo $tomcat_version
+
+when re use the script we can edit the value of the variable by this option : 
+docker image build -t test/test:v1 --build-arg tomcat_version=9.9.9 .
+```
+
+
+
+WORKDIR : change the working directory when building dockerfile layers
+
+```
+WORKDIR /opt
+```
+
+
+
+CMD : <mark style="color:red;">only use once as last instruction on Dockerfile and the content of it should be as array</mark>
+
+`CMD` instruction is used to specify the default command that will be executed when a container based on the <mark style="color:blue;">Docker image is started.</mark> The `CMD` instruction sets the command and any arguments that will be executed within the container's environment. It defines the main process that runs when the container starts.
+
+1.  Command in shell
+
+    ```Dockerfile
+    CMD echo "Hello, Docker!"
+    ```
+2.  **command in dockerfile**
+
+    ```Dockerfile
+    CMD ["echo", "Hello, Docker!"]
+    ```
+
+```
+
+(this example for httpd server) : 
+FROM   centos:7
+RUN    yum -y update
+RUN    yum -y install httpd
+COPY   ./index.html /var/www/html/index.html
+EXPOSE 80
+CMD    ["httpd" , "-D" , "FOREGROUND"]
+```
+
+\--------------------------------------------
+
+### Layered architecture :&#x20;
+
+when you build image in docker every instruction on the docker file is a layer of image built on the previous layer :&#x20;
+
+when building there is a cache saves every layer which will help us if a failure happen :&#x20;
+
+&#x20;
+
+<figure><img src=".gitbook/assets/Layerd Archi.png" alt=""><figcaption></figcaption></figure>
+
+\----------------------------------------------------------------------------
+
+build an image from existing container (Not preferred because it does not provide continuity of maintenance and development in the future the preferred is the docker file ):
+
+```
+the container should be stopped first. 
+docker commit <container_name_or_id> <new_image_name>:<tag>
+-a : author name 
+-c : CMD to give start up command just like Dockerfile
+ example : 
+----------------
+docker container commit –a “[Author name]” -c 'CMD ["httpd" , "-D" , "FOREGROUND"]' e04fr myhttpd:v1
+docker image ls
+REPOSITORY TAG IMAGE ID CREATED SIZE
+customhttpd latest adac0f56a7df 5 seconds ago 138MB
+httpd latest 417af7dc28bc 8 days ago 138MB
+```
+
