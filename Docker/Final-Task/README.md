@@ -238,7 +238,7 @@ DATABASES = {
     }
 }
 ```
-- Edit The Dockerfile to Run migrations during image build
+- Edit The Dockerfile to Run migrations during image build (this step don't works so i did the migrations from inside the container in the next step ) 
 ```
 escanor@escanor-virtual-machine:~/Desktop/tmp$ gedit Dockerfile
 
