@@ -173,4 +173,165 @@ escanor@escanor-virtual-machine:~/Desktop/nginx-docker$ docker run -itd --networ
 - now the reverse proxy is working and you can edit the config file to add filters or do anything related to the reverse proxy : 
 ![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/5678745e-6daa-44af-ad88-43a1af9b7825)
 ****
-## Step 4 
+## Step 4 : Create MySql Container and connect it with the Django App
+
+- Create MySql Container and pass the correct enviroment variables to it
+```
+escanor@escanor-virtual-machine:~/Desktop/tmp/mysite/mysite$ docker run --network backend --ip 10.10.10.7 --name app-mysql -v /home/escanor/Desktop/volume:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=FakePass -e MYSQL_USER=django -e MYSQL_PASSWORD=FakePass -d mysql:8.1.0@sha256:eb00f19a38312b85bfb7195eead2d07d35279f2a6a61b3dc994094dcefa57986
+```
+-Connect to the Mysql as root and give the permission to the django user to create tables and all other operations 
+```
+(mohannad) escanor@escanor-virtual-machine:~/Desktop/tmp$ mysql -h 10.10.10.7 -uroot -p
+Enter password: 
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MySQL connection id is 11
+Server version: 8.1.0 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MySQL [(none)]> GRANT ALL PRIVILEGES ON *.* TO 'django'@'%' WITH GRANT OPTION;
+Query OK, 0 rows affected (0.008 sec)
+
+MySQL [(none)]> EXIT
+Bye
+(mohannad) escanor@escanor-virtual-machine:~/Desktop/tmp$ mysql -h 10.10.10.7 -udjango -p
+Enter password: 
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MySQL connection id is 12
+Server version: 8.1.0 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MySQL [(none)]> create DATABASE django;
+Query OK, 1 row affected (0.005 sec)
+
+MySQL [(none)]> show databases;
++--------------------+
+| Database           |
++--------------------+
+| django             |
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+5 rows in set (0.007 sec)
+```
+- Update the database information in the Django app
+```
+escanor@escanor-virtual-machine:~/Desktop/tmp$ gedit mysite/mysite/settings.py
+ 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'django',
+        'USER': 'django',
+        'PASSWORD':'Pa55W0rd',
+        'HOST':'10.10.10.7',
+        'PORT':'3306',
+        'OPTIONS':{
+        	'init_command':"SET sql_mode='STRICT_TRANS_TABLES'"}
+    }
+}
+```
+- Edit The Dockerfile to Run migrations during image build
+```
+escanor@escanor-virtual-machine:~/Desktop/tmp$ gedit Dockerfile
+
+FROM python:3.8@sha256:c3ac277830cfe6d4b092c9e58f6295ac79f6091e7aa602c505e7c887c6b6f513
+WORKDIR /app 
+COPY ./ ./ 
+RUN apt update -y
+RUN pip install -r requirements.txt
+RUN pip install mysqlclient
+RUN python mysite/manage.py migrate
+EXPOSE 8000
+ENTRYPOINT ["python", "mysite/manage.py" , "runserver", "0.0.0.0:8000"]
+```
+- rebuild the Django image and
+```
+escanor@escanor-virtual-machine:~/Desktop/tmp$ docker build -t django-app:v2 .
+```
+- run new container and migrate the data bases 
+```
+escanor@escanor-virtual-machine:~/Desktop/tmp$ docker run --network backend --ip=10.10.10.9 -h django-app -d django-app:v2
+89e4eeef9c2d5e291a816f8bf393c620e5bad525f0de4bccd54f75ca448bae73
+escanor@escanor-virtual-machine:~/Desktop/tmp$ docker container exec -it 89e /bin/bash
+root@django-app:/app# ls
+Dockerfile  mohannad2  mysite  requirements.txt
+root@django-app:/app# cd m
+mohannad2/ mysite/    
+root@django-app:/app# cd mysite/
+root@django-app:/app/mysite# python manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, sessions
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying auth.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying sessions.0001_initial... OK
+root@django-app:/app/mysite# 
+```
+- Finally let's check if the data migrated susccessfully
+```
+escanor@escanor-virtual-machine:~/Desktop/tmp$ mysql -h 10.10.10.7 -udjango -p
+Enter password: 
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MySQL connection id is 16
+Server version: 8.1.0 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MySQL [(none)]> show databases;
++--------------------+
+| Database           |
++--------------------+
+| django             |
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+5 rows in set (0.002 sec)
+
+MySQL [(none)]> use django;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+MySQL [django]> show tables;
++----------------------------+
+| Tables_in_django           |
++----------------------------+
+| auth_group                 |
+| auth_group_permissions     |
+| auth_permission            |
+| auth_user                  |
+| auth_user_groups           |
+| auth_user_user_permissions |
+| django_admin_log           |
+| django_content_type        |
+| django_migrations          |
+| django_session             |
++----------------------------+
+10 rows in set (0.002 sec)
+```
