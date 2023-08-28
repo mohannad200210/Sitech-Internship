@@ -68,99 +68,41 @@ cd21ee57dd55556b20dd6c3eb29c82f622e75436cafb7a660d5541c4323f674d
 ****
 ## Step 3 : host Nginx container acting as a reverse proxy for the Django app
 
-- First you have to Create a directory named nginx-docker and create default nginx config file in it :
+- First you have to Create a directory named nginx-docker:
 ```
 escanor@escanor-virtual-machine:~/Desktop$ mkdir nginx-docker
 escanor@escanor-virtual-machine:~/Desktop$ cd nginx-docker 
+
+```
+
+- create default nginx config file in it and add proxy pass inside the config file (exactly inside the server block then inside the location block )
+
+```
 escanor@escanor-virtual-machine:~/Desktop/nginx-docker$ gedit default.config
-# This is the main Nginx configuration file
 
-# Specify the user and group for Nginx to run as
-user www-data;
-worker_processes auto;
+server {
+    listen 80;
+    server_name example.com;
 
-# Set the error log file and log level
-error_log /var/log/nginx/error.log warn;
-
-# Define the events section
-events {
-    worker_connections 1024;
-}
-
-# Define the HTTP server section
-http {
-    # Set the MIME type mappings
-    include /etc/nginx/mime.types;
-    
-    # Set the default log format
-    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
-                  '$status $body_bytes_sent "$http_referer" '
-                  '"$http_user_agent" "$http_x_forwarded_for"';
-    
-    # Specify the access log file
-    access_log /var/log/nginx/access.log main;
-
-    # Set the server section
-    server {
-        # Listen on port 80
-        listen 80;
-        
-        # Set the server name
-        server_name example.com www.example.com;
-        
-        # Set the root directory for serving files
-        root /var/www/html;
-        
-        # Define location blocks for handling requests
-        location / {
-            
-        }
-        
-        # Additional location blocks can be added here for different routes
-        
-        # Handle error pages
-        error_page 404 /404.html;
-        error_page 500 502 503 504 /50x.html;
-        
-        # Specify the location of error pages
-        location = /50x.html {
-            root /usr/share/nginx/html;
-        }
-        
-        # Enable gzip compression
-        gzip on;
-        gzip_types text/plain text/css application/javascript image/*;
-        
-        # Include additional configuration files if needed
-        include /etc/nginx/conf.d/*.conf;
+    location / {
+        proxy_pass http://django-app:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
 }
-```
 
-- add proxy pass inside the config file (exactly inside the server block then inside the location block )
-
-```
-server {
-        # Listen on port 80
-        listen 80;
-        
-        # Set the server name
-        server_name example.com www.example.com;
-        
-        # Set the root directory for serving files
-        root /var/www/html;
-        
-        # Define location blocks for handling requests
-        location / {
-            proxy_pass http://django-app:8000;
-        }
 ```
 - now lets create the docker file for the nginx
 ```
 escanor@escanor-virtual-machine:~/Desktop/nginx-docker$ gedit Dockerfile
 
 FROM nginx:stable@sha256:4a1d2e00b08fce95e140e272d9a0223d2d059142ca783bf43cf121d7c11c7df8
-COPY default.config /etc/nginx/conf.d
+FROM nginx:stable
+COPY default.conf /etc/nginx/conf.d/
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+
 ```
 - Build the nginx docker image
 ```
