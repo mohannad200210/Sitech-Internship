@@ -258,7 +258,7 @@ escanor@escanor-virtual-machine:~/Desktop/tmp$ docker build -t django-app:v2 .
 ```
 - run new container and migrate the data bases 
 ```
-escanor@escanor-virtual-machine:~/Desktop/tmp$ docker run --network backend --ip=10.10.10.9 -h django-app -d django-app:v2
+escanor@escanor-virtual-machine:~/Desktop/tmp$ docker run --network backend --ip=10.10.10.4 -h django-app -d django-app:v2
 89e4eeef9c2d5e291a816f8bf393c620e5bad525f0de4bccd54f75ca448bae73
 escanor@escanor-virtual-machine:~/Desktop/tmp$ docker container exec -it 89e /bin/bash
 root@django-app:/app# ls
