@@ -44,7 +44,7 @@ docker container run -p 80:8000 -d -h django-app mohannad200210/awsdjango:v2
 
  - Create ALB and connect the target group to it 
  ![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/d8a36b61-2774-4428-84ce-fc29608ab6e4)
- ### and the DNS name for the ALB is : Django-ALB-1997744320.eu-north-1.elb.amazonaws.com
+ ### and the DNS name for the ALB is : [Django-ALB-1997744320.eu-north-1.elb.amazonaws.com](Django-ALB-1997744320.eu-north-1.elb.amazonaws.com)
 - now let's edit the security group of the EC2 instance to receive the http traffic only from the ALB
  ![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/ab15a414-d5ce-4988-aff2-81797012f898)
 
