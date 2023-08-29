@@ -1,4 +1,5 @@
-## In this repo I will explain how to Create a small AWS project , host a Django application in ec2 instance and connect it with ALB as a reverse proxy and Connect the Django application with RDS MySql instead of default local SQLite3
+# Hosting a Django Application on AWS EC2 with ALB and RDS MySQL
+Welcome to this repository where I'll guide you through the process of creating a small AWS project. We'll cover how to host a Django application on an EC2 instance, connect it to an Application Load Balancer (ALB) as a reverse proxy, and replace the default local SQLite3 database with an RDS MySQL database.
 ****
 
 - i will use the same django project from the last task so lets build the image 
