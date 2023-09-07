@@ -1,6 +1,6 @@
 # Table of contents
 ## Notes
-* [HTTP\&HTTPS](Web-Notes/README.md)
+* [HTTP\&HTTPS](Web/Web-Notes/README.md)
 * [SERVER](server.md)
 * [PROXY](proxy.md)
 * [REVERSE PROXY & LOAD BALANCER](reverse-proxy-and-load-balancer.md)
