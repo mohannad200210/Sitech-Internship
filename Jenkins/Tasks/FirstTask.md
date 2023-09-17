@@ -1,0 +1,115 @@
+## this is the first part of the jenkins tasks, which is to build three pipelines to perform the following tasks:
+- Docker image build
+- Docker image push
+- Docker image deploy
+## and this is the POC : 
+
+## 1- Docker image build
+- From jenkins dashboard lets build new pipeline
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/1f6892ba-cfa3-4351-865c-390e94794d8d)
+
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/f3586499-1d88-4b8c-a33d-d8a6a7de15cd)
+
+- as pipeline script i will use this : 
+```
+pipeline {
+    agent any
+    parameters {
+        string(name: 'TAG', defaultValue: 'v1.0', description: 'Enter a tag e.g.: v1.0)')
+    }
+    stages {
+        stage('Build Image') {
+            steps {
+                script {
+                    sh "docker build -t mohannad200210/django-app:${params.TAG} /home/escanor/Desktop/django"
+                }
+            }
+        }
+    }
+}
+```
+- Now let's attempt to build it. The build failed because the user who executed the job doesn't have permission to use Docker.
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/e8742c83-bb77-4a1d-a751-b7cffc6926e6)
+- I will add a "whoami" command to the pipeline to determine the user executing the command, and then add that user to the Docker group.
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/3b10e0a0-14fe-48dc-b47e-ad958b3c3557)
+- The user is "Jenkins," let's proceed to add it to the Docker group.
+```
+escanor@escanor-virtual-machine:~/Desktop/django$ sudo usermod -aG docker jenkins      
+[sudo] password for escanor: 
+escanor@escanor-virtual-machine:~/Desktop/django$ groups jenkins
+jenkins : jenkins docker
+escanor@escanor-virtual-machine:~/Desktop/django$ sudo systemctl restart docker
+```
+- We successfully resolved the last problem , but now there is a new issue: I can't access the path of the Dockerfile.
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/71234fcb-8983-45b4-bc73-9a97814cb229)
+
+- I fixed it, but I don't think it's the best solution; I had to move the Dockerfile to the root directory so that Jenkins could access it. In the end, it built successfully.
+
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/ff48735e-c0e9-4fcb-ad42-a3f4afaace42)
+
+_______________________________________________________________________________________
+## 2- Upload image pipeline : 
+- From jenkins dashboard lets build new pipeline
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/a5ade1df-1842-4def-91d7-8ce8cd1bf71f)
+
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/5f4d0bf1-b736-4b7f-a194-b316b6403d4b)
+- as pipeline script i will use this : 
+```
+pipeline {
+    agent any
+    parameters {
+        string(name: 'TAG', defaultValue: 'v1.0', description: 'Enter the version tag you want to upload')
+    }
+    stages {
+        stage('Push Image') {
+            steps {
+                script {
+                   
+                    sh "docker push mohannad200210/django-app:${params.TAG}"
+                }
+            }
+        }
+    }
+}
+
+
+```
+- In this step, the build failed because it couldn't log in successfully to Dockehub. Therefore, I switched to Jenkins CLI then :
+```
+jenkins@escanor-virtual-machine:~$ gpg --generate-key
+jenkins@escanor-virtual-machine:~$ pass init B50151C0567***6E7FBF50DC1EE96AFD530C81C
+jenkins@escanor-virtual-machine:~$ docker login -u mohannad200210
+```
+- Now it built successfully.
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/60756f75-93ef-4ed5-aa7e-16a48c651676)
+
+-------------------------------------------------------------
+## 3- Upload image pipeline : 
+- From jenkins dashboard lets build new pipeline
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/81606962-e54f-4e97-ad69-f0ed9ca59d1f)
+- as pipeline script i will use this : 
+```
+pipeline {
+    agent any
+    parameters {
+        string(name: 'TAG', defaultValue: 'v1.0', description: 'Enter the version tag you want to deploy')
+    }
+    stages {
+        stage('Deploy Image') {
+            steps {
+                script {
+                    sh "docker run -d -p 8000:8000 mohannad200210/django-app:${params.TAG}"
+                }
+            }
+        }
+    }
+}
+```
+- Now it built successfully.
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/2d5b22e0-0b65-4e42-94f8-4e52adfb85e2)
+
+
+-------------------------------
+## the final result :
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/d58f86cb-ef0b-4860-9efc-28b6ec695a7e)
+
