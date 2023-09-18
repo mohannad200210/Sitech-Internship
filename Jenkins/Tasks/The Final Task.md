@@ -1,0 +1,128 @@
+## I completed the final jenkins task [ the second part of the task ], which includes:
+
+- Use a pre-build tomcat Dockerized project to Dockerize a Tomcat instance and deploy to a web page on it Jenkins instance 
+- Use the three pipelines from the first part of the task to build and deploy the tomcat web page.
+- Create a new git branch for the tomcat web app to trigger the pipeline on push action.
+
+## 1- create basic tomcat project + war file and push it to new branch in my github so i can pull it every time from jenkins :
+
+- for the war file i I downloaded a ready basic WAR file from the following URL : https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/
+- for the **dockerfile** i build it from an unoffical base image i created called mohannad200210/trytomee since the offecial image didn't work with me
+```
+FROM mohannad200210/trytomee:latest@sha256:e4352205716372821cdb4a87101627329ba206a4a807499a3849ea4e04abd231
+
+ENV TOMCAT_BASE=/usr/local/tomee
+
+ADD *.war $TOMCAT_BASE/webapps/
+
+EXPOSE 8080
+
+CMD ["catalina.sh", "run"]
+```
+
+
+- now let's push the dockerfile and war file to new branch in my repo called tomcat-project
+```
+escanor@escanor-virtual-machine:~/Desktop/tomcat$ git remote add origin https://github.com/mohannad200210/Sitech-Internship.git
+escanor@escanor-virtual-machine:~/Desktop/tomcat$ git checkout -b tomcat-project
+escanor@escanor-virtual-machine:~/Desktop/tomcat$ git add .
+escanor@escanor-virtual-machine:~/Desktop/tomcat$ git commit -m "Add Dockerfile for Tomcat project"
+escanor@escanor-virtual-machine:~/Desktop/tomcat$ git push -u origin tomcat-project
+Username for 'https://github.com': mohannad200210
+Password for 'https://mohannad200210@github.com': ghp_0I1xLpIKtr******wXikGzQ8******lJ
+```
+- here is the URL for the new branch : https://github.com/mohannad200210/Sitech-Internship/tree/tomcat-project
+-------------------------------------------------
+## 2. Build image pipeline 
+- I will use the same from the first task but i will modify the pipeline script to : 
+```
+pipeline {
+    agent any
+    parameters {
+        string(name: 'TAG', defaultValue: 'v1.0', description: 'Enter a tag e.g.: v1.0)')
+    }
+    stages {
+        stage('Build Image') {
+            steps {
+                script {
+                    git branch: 'tomcat-project', url: 'https://github.com/mohannad200210/Sitech-Internship.git'
+                    sh "docker build -t mohannad200210/tomcat:${params.TAG} . "
+                    
+                }
+            }
+        }
+    }
+}
+```
+-----------------------------------------------------
+## 3. Upload image pipeline
+- I will modify the pipeline script from the first task to be more generic, so I will add a parameter to specify the name of the image
+```
+pipeline {
+    agent any
+    parameters {
+        string(name: 'TAG', defaultValue: 'v1.0', description: 'Enter the version tag you want to upload')
+        string(name: 'IMAGENAME', defaultValue: 'tomcat', description: 'Enter the name of the image you want to upload')
+    }
+    stages {
+        stage('Push Image') {
+            steps {
+                script {
+                   
+                    sh "docker push mohannad200210/${params.IMAGENAME}:${params.TAG}"
+                }
+            }
+        }
+    }
+}
+```
+-------------------------------------------------
+## 4. Deploy image pipeline
+- Also I will modify the pipeline script from the first task to be more generic, so I will add a parameter to specify the name of the image and another parameter to specify the port number
+```
+pipeline {
+    agent any
+    parameters {
+        string(name: 'TAG', defaultValue: 'v1.0', description: 'Enter the version tag you want to deploy')
+        string(name: 'IMAGENAME', defaultValue: 'tomcat', description: 'Enter the name of the image you want to deploy')
+        string(name: 'PORTNUMBER', defaultValue: '8080', description: 'Enter the number of the port you want to expose it will exposed to 8888')
+
+        
+    }
+    stages {
+        stage('Deploy Image') {
+            steps {
+                script {
+                    sh "docker run -d -p 8888:${params.PORTNUMBER} mohannad200210/${params.IMAGENAME}:${params.TAG}"
+                }
+            }
+        }
+    }
+}
+```
+------------------------------------------------
+
+## 5. trigger the pipeline on push action.
+- Active githook triger from the pipeline job settings
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/ee91ba9e-e495-428d-8b96-e0af6f6b5d9e)
+- We need to expose our Jenkins instance using Ngrok since it's hosted locally. GitHub won't be able to access it unless it's exposed.
+```
+escanor@escanor-virtual-machine:~/Desktop$ ngrok http 8080
+```
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/e1dab57f-115a-4d0b-bd7f-225461aa8d71)
+- after switch to the github branch tomcat-project in github go to `Settings` > `Webhooks` > `Add webhook.`
+- add your Payload URL
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/4529cc93-0044-4415-ab7f-d93964fd9f25)
+- It successfully responds to pings
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/949e3641-3077-44d0-976a-00a2eb04cb03)
+- new let's push any thing to test if it work 
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/c945f28d-cc86-43fe-a6a5-2dec6a855c0a)
+- and it works :
+![image](https://github.com/mohannad200210/Sitech-Internship/blob/08c817f2fadb9e9a89783eb3f2b748022117579e/Daily-Updates%20/Photos/webhook.png)
+
+## The final result after building the 3 pipelines :
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/c21ecc35-889b-4d59-b7d8-f6014628b98f)
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/96f3d0da-7ce1-4068-82e8-c58a356827ad)
+![image](https://github.com/mohannad200210/Sitech-Internship/assets/95110750/7d2c3bc3-5ddb-4980-853e-3d1da46904ec)
+
+
